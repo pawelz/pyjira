@@ -1,0 +1,6 @@
+soap.txt
+.*.swp
+*.wsdl
+*.pyc
+*.pyo
+*~

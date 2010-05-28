@@ -1,0 +1,30 @@
+0. What is that?
+
+   PyJIRA is ptyhon library for accessing Atlassian JIRA remote API.
+   
+   It is based on my earlier project - cojira, the commandline interface for
+   JIRA. I'm planning to rewrite cojira to use PyJIRA library in nearest future.
+
+1. Compatibility
+
+   PyJIRA needs at least jira-4.0. It won't work with jira-3, because it uses
+   getProjectsNoSchemes API call which was added in 4.0 release. I'm not
+   planning to support older JIRA versions. If you need to hack it to work
+   with older JIRA, take a look at cojira project, how to list projects list
+   without getProjectsNoSchemes function.
+
+2. How to use it?
+
+   It is in very early stage of development and is not functional yet.
+
+   If you want to play with PyJIRA, export following enviromental variables: 
+   JIRA_URL      - base JIRA url without trailing slash
+   JIRA_USERNAME - name of JIRA account
+   JIRA_PASSWORD - hmmm, I realy don't know what is the purpose of this one
+   and run ./test.py
+
+3. Author/License/Copyright
+
+   Author: Paweł Zuzelski <pzz@touk.pl>
+   Copyright: © 2009, 2010 TouK sp. z o.o. s.k.a.
+   License: MIT License
