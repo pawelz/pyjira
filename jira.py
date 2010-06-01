@@ -4,46 +4,15 @@
 # Author:    Paweł Zuzelski <pzz@touk.pl>
 
 from SOAPpy import WSDL
+import soap
 import jiraError
 
-class Jira(WSDL.Proxy):
-	access = {}
-
-	# Public interface
-
-	def __init__(self, URL, username, password):
-		"""Authenticates to JIRA (by calling auth method) and reads list of projects."""
-		self.access = {"URL": URL, "username": username, "password": password}
-		self.auth()
-
-	# Private methods
-
-	def auth(self):
-		"""Authenticates to JIRA"""
-		WSDL.Proxy.__init__(self, self.wsdllocation())
-		self.token = self.login(self.access["username"], self.access["password"])
-
-	def wsdllocation(self):
-		"""Returns JIRA SOAP WSDL URL"""
-		return self.access["URL"] + '/rpc/soap/jirasoapservice-v2?wsdl'
-	
-	# Debug/Development methods
-
-	def listSOAPmethods(self):
-		"""Prints all available SOAP calls"""
-		for key in self.methods.keys():
-			print key, ': '
-			for param in self.methods[key].inparams:
-				print '\t', param.name.ljust(10), param.type
-			for param in self.methods[key].outparams:
-				print '\tOut: ', param.name.ljust(10), param.type
-
-class Root:
+class Jira:
 	project = {}
 	def __init__(self, j):
-		self.jira = j
-		for p in self.jira.getProjectsNoSchemes(self.jira.token):
-			self.project[p["key"]] = Project(self.jira, p)
+		self.soap = j
+		for p in self.soap.getProjectsNoSchemes(self.soap.token):
+			self.project[p["key"]] = Project(self.soap, p)
 
 	def getProject(self, k):
 		"""Returns project with given KEY."""
@@ -68,7 +37,7 @@ class Root:
 class Project:
 	
 	def __init__(self, j, l):
-		self.jira                = j
+		self.soap                = j
 		self.projectUrl          = l["projectUrl"]
 		self.name                = l["name"]
 		self.lead                = l["lead"]
@@ -81,7 +50,7 @@ class Project:
 		self.id                  = int(l["id"])
 	
 	def getIssues(self, status="Open"):
-		return self.jira.getIssuesFromJqlSearch(self.jira.token, "project = %s and status = %s" % (self.key, status), 300)
+		return self.soap.getIssuesFromJqlSearch(self.soap.token, "project = %s and status = %s" % (self.key, status), 300)
 
 	def getNotificationScheme(self):
 		return NotificationScheme(self.notificationScheme)

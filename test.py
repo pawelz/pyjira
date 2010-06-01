@@ -5,14 +5,15 @@
 # Author:    Paweł Zuzelski <pzz@touk.pl>
 
 import sys
+import soap
 import jira
 import jiraError
 import config
 
 cfg = config.pyjira()
-j = jira.Jira(cfg["url"], cfg["username"], cfg["password"])
+j = soap.Soap(cfg["url"], cfg["username"], cfg["password"])
 
-r = jira.Root(j)
+r = jira.Jira(j)
 
 if len(sys.argv) != 2:
 	print "Try: %s project_name" % sys.argv[0]
