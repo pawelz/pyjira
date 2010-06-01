@@ -7,12 +7,36 @@ from SOAPpy import WSDL
 import soap
 import jiraError
 
+class JiraObject:
+	_specialFields = ['name', 'id']
+
+	def __init__(self, s, l):
+		self._soap = s
+		map(lambda x: self.__dict__.update([(x, l[x])]), l._asdict())
+	
+	def fields(self):
+		"""
+		Returns list of all JIRA fields
+
+		Actually it returns all class fields that are not methodes and whose
+		names does not begin with '_'.
+		"""
+		return filter(lambda x: type(self.__dict__[x]) != type(self.fields) and x[0] != '_', self.__dict__)
+
+	def maxlen(self):
+		"""Compute maximal field name, and cache result in self._max variable"""
+		return self.__dict__.setdefault('_max', reduce(max, map(len, self.fields())))
+
+	def display(self):
+		fields = filter(lambda x: x not in self._specialFields, self.fields())
+		print '\n'.join(map(lambda f: " %s%s : %s" % (' '*(self.maxlen()-len(f)), f, self.__dict__[f]), fields))
+
 class Jira:
 	project = {}
 	def __init__(self, j):
-		self.soap = j
-		for p in self.soap.getProjectsNoSchemes(self.soap.token):
-			self.project[p["key"]] = Project(self.soap, p)
+		self._soap = j
+		for p in self._soap.getProjectsNoSchemes(self._soap.token):
+			self.project[p["key"]] = Project(self._soap, p)
 
 	def getProject(self, k):
 		"""Returns project with given KEY."""
@@ -33,24 +57,13 @@ class Jira:
 				return self.project[p]
 		raise jiraError.ProjectNotFound()
 
+	#def getGroup(self, n):
 
-class Project:
-	
-	def __init__(self, j, l):
-		self.soap                = j
-		self.projectUrl          = l["projectUrl"]
-		self.name                = l["name"]
-		self.lead                = l["lead"]
-		self.url                 = l["url"]
-		self.key                 = l["key"]
-		self.description         = l["description"]
-		self.notificationScheme  = l["notificationScheme"]
-		self.issueSecurityScheme = l["issueSecurityScheme"]
-		self.permissionScheme    = l["permissionScheme"]
-		self.id                  = int(l["id"])
-	
+
+
+class Project(JiraObject):
 	def getIssues(self, status="Open"):
-		return self.soap.getIssuesFromJqlSearch(self.soap.token, "project = %s and status = %s" % (self.key, status), 300)
+		return self._soap.getIssuesFromJqlSearch(self._soap.token, "project = %s and status = %s" % (self.key, status), 300)
 
 	def getNotificationScheme(self):
 		return NotificationScheme(self.notificationScheme)
@@ -61,14 +74,17 @@ class Project:
 	def getPermissionScheme(self):
 		return PermissionScheme(self.permissionScheme)
 
-class NotificationScheme():
-	def __init__(self, s):
-		raise jiraError.NotImplementedYet()
+class Issue(JiraObject):
+	pass
 
-class IssueSecurityScheme():
-	def __init__(self, s):
-		raise jiraError.NotImplementedYet()
+class NotificationScheme(JiraObject):
+	pass
 
-class PermissionScheme():
-	def __init__(self, s):
-		raise jiraError.NotImplementedYet()
+class IssueSecurityScheme(JiraObject):
+	pass
+
+class PermissionScheme(JiraObject):
+	pass
+
+class Group(JiraObject):
+	pass

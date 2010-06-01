@@ -23,6 +23,6 @@ try:
 	print "The leader of ‘%s’ project is ‘%s’." % (sys.argv[1], r.getProjectByName(sys.argv[1]).lead)
 	print "Issues in %s:" % sys.argv[1]
 	for i in r.getProjectByName(sys.argv[1]).getIssues("open"):
-		print str(i)
+		print jira.Issue(j, i).display()
 except(jiraError.ProjectNotFound):
 	print "Project not found: ‘%s’." % sys.argv[1]
