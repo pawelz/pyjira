@@ -8,7 +8,6 @@ import jiraError
 
 class Jira(WSDL.Proxy):
 	access = {}
-	project = {}
 
 	# Public interface
 
@@ -16,27 +15,6 @@ class Jira(WSDL.Proxy):
 		"""Authenticates to JIRA (by calling auth method) and reads list of projects."""
 		self.access = {"URL": URL, "username": username, "password": password}
 		self.auth()
-		for p in self.getProjectsNoSchemes(self.token):
-			self.project[p["key"]] = Project(p)
-
-	def getProject(self, k):
-		"""Returns project with given KEY."""
-		return project["k"]
-
-	def getProjectById(self, i):
-		"""Returns project with given Id."""
-		return project["k"]
-		for p in self.project:
-			if self.project[p].id == i:
-				return self.project[p]
-		raise jiraError.ProjectNotFound()
-
-	def getProjectByName(self, n):
-		"""Returns project with given Name."""
-		for p in self.project:
-			if self.project[p].name == n:
-				return self.project[p]
-		raise jiraError.ProjectNotFound()
 
 	# Private methods
 
@@ -60,8 +38,37 @@ class Jira(WSDL.Proxy):
 			for param in self.methods[key].outparams:
 				print '\tOut: ', param.name.ljust(10), param.type
 
+class Root:
+	project = {}
+	def __init__(self, j):
+		self.jira = j
+		for p in self.jira.getProjectsNoSchemes(self.jira.token):
+			self.project[p["key"]] = Project(self.jira, p)
+
+	def getProject(self, k):
+		"""Returns project with given KEY."""
+		return project["k"]
+
+	def getProjectById(self, i):
+		"""Returns project with given Id."""
+		return project["k"]
+		for p in self.project:
+			if self.project[p].id == i:
+				return self.project[p]
+		raise jiraError.ProjectNotFound()
+
+	def getProjectByName(self, n):
+		"""Returns project with given Name."""
+		for p in self.project:
+			if self.project[p].name == n:
+				return self.project[p]
+		raise jiraError.ProjectNotFound()
+
+
 class Project:
-	def __init__(self, l):
+	
+	def __init__(self, j, l):
+		self.jira                = j
 		self.projectUrl          = l["projectUrl"]
 		self.name                = l["name"]
 		self.lead                = l["lead"]
@@ -73,13 +80,16 @@ class Project:
 		self.permissionScheme    = l["permissionScheme"]
 		self.id                  = int(l["id"])
 	
-	def getNotificationScheme():
+	def getIssues(self, status="Open"):
+		return self.jira.getIssuesFromJqlSearch(self.jira.token, "project = %s and status = %s" % (self.key, status), 300)
+
+	def getNotificationScheme(self):
 		return NotificationScheme(self.notificationScheme)
 
-	def getIssueSecurityScheme():
+	def getIssueSecurityScheme(self):
 		return IssueSecurityScheme(self.issueSecurityScheme)
 
-	def getPermissionScheme():
+	def getPermissionScheme(self):
 		return PermissionScheme(self.permissionScheme)
 
 class NotificationScheme():
