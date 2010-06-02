@@ -6,8 +6,14 @@
 class NotImplementedYet(Exception):
 	pass
 
+class CantCastToString(Exception):
+	pass
+
 class ProjectNotFound(Exception):
 	pass
 
 class GroupNotFound(Exception):
+	pass
+
+class UserNotFound(Exception):
 	pass

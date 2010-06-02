@@ -60,7 +60,7 @@ class JiraObject:
 		except (AttributeError):
 			return self.name
 		except (AttributeError):
-			raise cantCastToString()
+			raise jiraError.CantCastToString()
 
 class Jira:
 	"""
