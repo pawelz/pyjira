@@ -47,6 +47,21 @@ class JiraObject:
 		fields = filter(lambda x: x not in self._specialFields, self.fields())
 		return '\n'.join(map(lambda f: " %s%s : %s" % (' '*(self.maxlen()-len(f)), f, self.__dict__[f]), fields))
 
+	def __str__(self):
+		"""
+		Returns main JIRA object identifier.
+
+		It's quite tricky, yet very handy. Many JIRA API calls operate on
+		keys, or names. So if we pass str(user) we don't have to care whether
+		user is users name, or it is User object.
+		"""
+		try:
+			return self.key
+		except (AttributeError):
+			return self.name
+		except (AttributeError):
+			raise cantCastToString()
+
 class Jira:
 	"""
 	Class representing Jira instance. Note that this class does not inherits
