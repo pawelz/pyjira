@@ -8,9 +8,18 @@ import soap
 import jiraError
 
 class JiraObject:
+	"""
+	‘Virtual’ class for all Jira objects like Project, Issue, User,
+	NotificationScheme etc.
+	"""
+
 	_specialFields = ['id']
 
 	def __init__(self, s, l):
+		"""
+		Creates JiraObject fields based on dictionary object as returned by
+		Jira SOAP API.
+		"""
 		self._soap = s
 		map(lambda x: self.__dict__.update([(x, l[x])]), l._asdict())
 	
@@ -28,10 +37,20 @@ class JiraObject:
 		return self.__dict__.setdefault('_max', reduce(max, map(len, self.fields())))
 
 	def display(self):
+		"""
+		Returns pretty-printed object information, excluding _specialFields
+
+		Classes that inherit JiraObject are supposed to overload this
+		function, to handle _specialFields.
+		"""
 		fields = filter(lambda x: x not in self._specialFields, self.fields())
 		return '\n'.join(map(lambda f: " %s%s : %s" % (' '*(self.maxlen()-len(f)), f, self.__dict__[f]), fields))
 
 class Jira:
+	"""
+	Class representing Jira instance. Note that this class does not inherits
+	JiraObject class.
+	"""
 	project = {}
 	def __init__(self, j):
 		self._soap = j
