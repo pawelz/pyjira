@@ -1,3 +1,9 @@
+1. Important TODOs:
 * Learn how to write pythonic installation scripts and write one for PyJIRA.
 * Translate my pseudo-english to real english.
-* Almost everything else.
+
+2. Some Ideas:
+* soap.py:
+  generate methodes that overload all jira API calls and pass self.token to
+  them. These wrappers may also str() all arguments, so these calls will
+  accept JiraObject arguments.
