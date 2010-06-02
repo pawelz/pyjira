@@ -8,7 +8,7 @@ import soap
 import jiraError
 
 class JiraObject:
-	_specialFields = ['name', 'id']
+	_specialFields = ['id']
 
 	def __init__(self, s, l):
 		self._soap = s
@@ -29,7 +29,7 @@ class JiraObject:
 
 	def display(self):
 		fields = filter(lambda x: x not in self._specialFields, self.fields())
-		print '\n'.join(map(lambda f: " %s%s : %s" % (' '*(self.maxlen()-len(f)), f, self.__dict__[f]), fields))
+		return '\n'.join(map(lambda f: " %s%s : %s" % (' '*(self.maxlen()-len(f)), f, self.__dict__[f]), fields))
 
 class Jira:
 	project = {}
@@ -75,8 +75,16 @@ class Project(JiraObject):
 		return PermissionScheme(self.permissionScheme)
 
 class Issue(JiraObject):
-	pass
+	_specialFields = ['key', 'summary', 'description', 'reporter', 'assignee']
 
+	def display(self):
+		return '[%s] (%s => %s) %s\n%s\n%s\n\n' % (
+				self.key,
+				self.reporter,
+				self.summary,
+				self.assignee,
+				JiraObject.display(self),
+				self.description)
 class NotificationScheme(JiraObject):
 	pass
 
