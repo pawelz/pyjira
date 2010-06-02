@@ -51,16 +51,16 @@ class Jira:
 		raise jiraError.ProjectNotFound()
 
 	def getProjectByName(self, n):
-		"""Returns project with given Name."""
+		"""Returns project with given name."""
 		for p in self.project:
 			if self.project[p].name == n:
 				return self.project[p]
 		raise jiraError.ProjectNotFound()
 
-	#def getGroup(self, n):
-
-
-
+	def getGroupByName(self, n):
+		"""Returns group with given name."""
+		return Group(self._soap, self._soap.getGroup(self._soap.token, n))
+	
 class Project(JiraObject):
 	def getIssues(self, status="Open"):
 		return self._soap.getIssuesFromJqlSearch(self._soap.token, "project = %s and status = %s" % (self.key, status), 300)
@@ -102,4 +102,5 @@ class User(JiraObject):
 	pass
 
 class Group(JiraObject):
-	pass
+	def getMembers(self):
+		return map(lambda x: User(self._soap, x), filter(lambda x: x, self.users))
