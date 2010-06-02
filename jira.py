@@ -22,6 +22,7 @@ class JiraObject:
 		Jira SOAP API.
 		"""
 		self._soap = s
+		self.raw = l
 		map(lambda x: self.__dict__.update([(x, l[x])]), l._asdict())
 	
 	def fields(self):
@@ -99,6 +100,13 @@ class Jira:
 		except(SOAPError):
 			raise jiraError.GroupNotFound
 	
+	def getUserByName(self, n):
+		"""Returns user with given name."""
+		try:
+			return User(self._soap, self._soap.getUser(self._soap.token, n))
+		except(SOAPError):
+			raise jiraError.UserNotFound
+	
 class Project(JiraObject):
 	def getIssues(self, status="Open"):
 		return self._soap.getIssuesFromJqlSearch(self._soap.token, "project = %s and status = %s" % (self.key, status), 300)
@@ -141,4 +149,8 @@ class User(JiraObject):
 
 class Group(JiraObject):
 	def getMembers(self):
+		# Yeaahhh, functional overdoze
 		return map(lambda x: User(self._soap, x), filter(lambda x: x, self.users))
+
+	def removeUser(self, u):
+		self._soap.removeUserFromGroup(self._soap.token, self.raw, u.raw)
