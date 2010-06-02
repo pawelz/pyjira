@@ -4,6 +4,10 @@
 # Copyright: © 2009, 2010 TouK sp. z o.o. s.k.a.
 # Author:    Paweł Zuzelski <pzz@touk.pl>
 
+#
+# This script lists all all open issues in given project
+#
+
 import sys
 import soap
 import jira
@@ -20,7 +24,6 @@ if len(sys.argv) != 2:
 	sys.exit(1)
 
 try:
-	print "The leader of ‘%s’ project is ‘%s’." % (sys.argv[1], r.getProjectByName(sys.argv[1]).lead)
 	print "Issues in %s:" % sys.argv[1]
 	for i in r.getProjectByName(sys.argv[1]).getIssues("open"):
 		print jira.Issue(j, i).display()
