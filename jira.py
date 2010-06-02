@@ -65,6 +65,9 @@ class Project(JiraObject):
 	def getIssues(self, status="Open"):
 		return self._soap.getIssuesFromJqlSearch(self._soap.token, "project = %s and status = %s" % (self.key, status), 300)
 
+	def getLead(self):
+		return self._soap.getUser(self._soap.token, self.lead)
+
 	def getNotificationScheme(self):
 		return NotificationScheme(self.notificationScheme)
 
@@ -85,6 +88,7 @@ class Issue(JiraObject):
 				self.assignee,
 				JiraObject.display(self),
 				self.description)
+
 class NotificationScheme(JiraObject):
 	pass
 
@@ -92,6 +96,9 @@ class IssueSecurityScheme(JiraObject):
 	pass
 
 class PermissionScheme(JiraObject):
+	pass
+
+class User(JiraObject):
 	pass
 
 class Group(JiraObject):
