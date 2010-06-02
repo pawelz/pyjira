@@ -4,6 +4,7 @@
 # Author:    Paweł Zuzelski <pzz@touk.pl>
 
 from SOAPpy import WSDL
+from SOAPpy.Types import faultType as SOAPError
 import soap
 import jiraError
 
@@ -78,7 +79,10 @@ class Jira:
 
 	def getGroupByName(self, n):
 		"""Returns group with given name."""
-		return Group(self._soap, self._soap.getGroup(self._soap.token, n))
+		try:
+			return Group(self._soap, self._soap.getGroup(self._soap.token, n))
+		except(SOAPError):
+			raise jiraError.GroupNotFound
 	
 class Project(JiraObject):
 	def getIssues(self, status="Open"):

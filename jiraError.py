@@ -8,3 +8,6 @@ class NotImplementedYet(Exception):
 
 class ProjectNotFound(Exception):
 	pass
+
+class GroupNotFound(Exception):
+	pass
