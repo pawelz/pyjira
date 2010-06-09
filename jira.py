@@ -54,10 +54,10 @@ class JiraObject:
 		"""
 		try:
 			return self.key
-		except (AttributeError):
+		except AttributeError:
 			return self.name
-		except (AttributeError):
-			raise jiraError.CantCastToString()
+		except AttributeError as e:
+			raise jiraError.CantCastToString(e)
 
 class Jira:
 	"""
@@ -80,7 +80,7 @@ class Jira:
 		for p in self.project:
 			if self.project[p].id == i:
 				return self.project[p]
-		raise jiraError.ProjectNotFound()
+		raise jiraError.ProjectNotFound(p)
 
 	def getProjectByName(self, n):
 		"""Returns project with given name."""
@@ -93,15 +93,15 @@ class Jira:
 		"""Returns group with given name."""
 		try:
 			return Group(self._soap, self._soap.service.getGroup(self._soap.token, n))
-		except(SOAPError):
-			raise jiraError.GroupNotFound
+		except SOAPError as e:
+			raise jiraError.GroupNotFound(e)
 	
 	def getUserByName(self, n):
 		"""Returns user with given name."""
 		try:
 			return User(self._soap, self._soap.service.getUser(self._soap.token, n))
-		except(SOAPError):
-			raise jiraError.UserNotFound
+		except SOAPError:
+			raise jiraError.UserNotFound(e)
 	
 class Project(JiraObject):
 	def getIssues(self, status="Open"):
@@ -149,4 +149,7 @@ class Group(JiraObject):
 		return map(lambda x: User(self._soap, x), filter(lambda x: x, self.users))
 
 	def removeUser(self, u):
-		self._soap.service.removeUserFromGroup(self._soap.token, self.raw, u.raw)
+		try:
+			self._soap.service.removeUserFromGroup(self._soap.token, self.raw, u.raw)
+		except SOAPError as e:
+			raise jiraError.OperationFailed(e)
