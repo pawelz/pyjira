@@ -3,8 +3,7 @@
 # Copyright: © 2009, 2010 TouK sp. z o.o. s.k.a.
 # Author:    Paweł Zuzelski <pzz@touk.pl>
 
-from SOAPpy import WSDL
-from SOAPpy.Types import faultType as SOAPError
+from suds import WebFault as SOAPError
 import soap
 import jiraError
 
@@ -17,13 +16,10 @@ class JiraObject:
 	_specialFields = ['id']
 
 	def __init__(self, s, l):
-		"""
-		Creates JiraObject fields based on dictionary object as returned by
-		Jira SOAP API.
-		"""
 		self._soap = s
 		self.raw = l
-		map(lambda x: self.__dict__.update([(x, l[x])]), l._asdict())
+		# Yep, I know, it's not optimal, bat it's convenient
+		map(lambda x: self.__dict__.update([(x, l[x])]), l.__dict__)
 	
 	def fields(self):
 		"""
@@ -71,7 +67,7 @@ class Jira:
 	project = {}
 	def __init__(self, j):
 		self._soap = j
-		for p in self._soap.getProjectsNoSchemes(self._soap.token):
+		for p in self._soap.service.getProjectsNoSchemes(self._soap.token):
 			self.project[p["key"]] = Project(self._soap, p)
 
 	def getProject(self, k):
@@ -96,23 +92,23 @@ class Jira:
 	def getGroupByName(self, n):
 		"""Returns group with given name."""
 		try:
-			return Group(self._soap, self._soap.getGroup(self._soap.token, n))
+			return Group(self._soap, self._soap.service.getGroup(self._soap.token, n))
 		except(SOAPError):
 			raise jiraError.GroupNotFound
 	
 	def getUserByName(self, n):
 		"""Returns user with given name."""
 		try:
-			return User(self._soap, self._soap.getUser(self._soap.token, n))
+			return User(self._soap, self._soap.service.getUser(self._soap.token, n))
 		except(SOAPError):
 			raise jiraError.UserNotFound
 	
 class Project(JiraObject):
 	def getIssues(self, status="Open"):
-		return self._soap.getIssuesFromJqlSearch(self._soap.token, "project = %s and status = %s" % (self.key, status), 300)
+		return self._soap.service.getIssuesFromJqlSearch(self._soap.token, "project = %s and status = %s" % (self.key, status), 300)
 
 	def getLead(self):
-		return self._soap.getUser(self._soap.token, self.lead)
+		return self._soap.service.getUser(self._soap.token, self.lead)
 
 	def getNotificationScheme(self):
 		return NotificationScheme(self.notificationScheme)
@@ -153,4 +149,4 @@ class Group(JiraObject):
 		return map(lambda x: User(self._soap, x), filter(lambda x: x, self.users))
 
 	def removeUser(self, u):
-		self._soap.removeUserFromGroup(self._soap.token, self.raw, u.raw)
+		self._soap.service.removeUserFromGroup(self._soap.token, self.raw, u.raw)
