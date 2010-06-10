@@ -18,7 +18,7 @@ class JiraObject:
 	def __init__(self, s, l):
 		self._soap = s
 		self.raw = l
-		# Yep, I know, it's not optimal, bat it's convenient
+		# Yep, I know, it's not optimal, but it's convenient
 		map(lambda x: self.__dict__.update([(x, l[x])]), l.__dict__)
 	
 	def fields(self):
