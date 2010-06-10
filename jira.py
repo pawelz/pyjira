@@ -100,7 +100,7 @@ class Jira:
 		"""Returns user with given name."""
 		try:
 			return User(self._soap, self._soap.service.getUser(self._soap.token, n))
-		except SOAPError:
+		except SOAPError as e:
 			raise jiraError.UserNotFound(e)
 	
 class Project(JiraObject):
