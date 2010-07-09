@@ -38,5 +38,8 @@ class GroupNotFound(JiraError):
 class UserNotFound(JiraError):
 	importance = 1
 
+class IssueNotFound(JiraError):
+	importance = 1
+
 class OperationFailed(JiraError):
 	importance = 1

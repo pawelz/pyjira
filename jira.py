@@ -4,7 +4,9 @@
 # Author:    Paweł Zuzelski <pzz@touk.pl>
 
 from suds import WebFault as SOAPError
+import sys
 import soap
+import types
 import jiraError
 
 class JiraObject:
@@ -15,18 +17,28 @@ class JiraObject:
 
 	_specialFields = ['id', 'raw']
 
+	sudsType = ""
+
 	def __init__(self, s, l):
 		self._soap = s
-		self.raw = l
+
+		# [pl] Jeżeli l jest Null, tworzymy pusty obiekt danego typu
+		if (type(l) == types.NoneType):
+			self.raw = s.factory.create(self.sudsType)
+		# [pl] w przeciwnym przypadku l jest obiektem suds.
+		else:
+			self.raw = l
+
+		print self.raw
 		# Yep, I know, it's not optimal, but it's convenient
-		map(lambda x: self.__dict__.update([(x, l[x])]), l.__dict__)
-	
+		map(lambda x: self.__dict__.update([(x, self.raw[x])]), self.raw.__dict__)
 
 		self.verify()
 
 	def verify(self):
 		print >>sys.stderr, "FIXME: Verify not implemented for this JIRA Object type"
 		return (True, True)
+
 	def fields(self):
 		"""
 		Returns list of all JIRA fields
@@ -110,6 +122,13 @@ class Jira:
 		except SOAPError as e:
 			raise jiraError.UserNotFound(e)
 	
+	def getIssueByKey(self, k):
+		"""Returns issue with given key."""
+		try:
+			return Issue(self._soap, self._soap.service.getIssue(self._soap.token, k))
+		except SOAPError as e:
+			raise jiraError.IssueNotFound(e)
+
 class Project(JiraObject):
 	def getIssues(self, status="Open"):
 		return self._soap.service.getIssuesFromJqlSearch(self._soap.token, "project = %s and status = %s" % (self.key, status), 300)
@@ -127,30 +146,41 @@ class Project(JiraObject):
 		return PermissionScheme(self.permissionScheme)
 
 class Issue(JiraObject):
-	_specialFields = ['key', 'summary', 'description', 'reporter', 'assignee']
+	_specialFields = ['id', 'raw', 'key', 'summary', 'description', 'reporter', 'assignee']
+	sudsType = "TODO:unknown"
+
+	def __init__(self, j, r):
+		JiraObject.__init__(self, j, r)
+		self._comments=self._soap.service.getComments(self._soap.token, self.key)
 
 	def display(self):
-		return '[%s] (%s => %s) %s\n%s\n%s\n\n' % (
+		return '[%s] (%s => %s) %s\n%s\n\n%s\n%s\n' % (
 				self.key,
 				self.reporter,
 				self.summary,
 				self.assignee,
 				JiraObject.display(self),
-				self.description)
-
+				self.description,
+				'\n\n'.join([str(i).decode("UTF-8") for i in self._comments]))
+	
 class NotificationScheme(JiraObject):
+	sudsType = "TODO:unknown"
 	pass
 
 class IssueSecurityScheme(JiraObject):
+	sudsType = "TODO:unknown"
 	pass
 
 class PermissionScheme(JiraObject):
+	sudsType = "TODO:unknown"
 	pass
 
 class User(JiraObject):
+	sudsType = "TODO:unknown"
 	pass
 
 class Group(JiraObject):
+	sudsType = "TODO:unknown"
 	def getMembers(self):
 		# Yeaahhh, functional overdoze
 		return map(lambda x: User(self._soap, x), filter(lambda x: x, self.users))
@@ -160,3 +190,9 @@ class Group(JiraObject):
 			self._soap.service.removeUserFromGroup(self._soap.token, self.raw, u.raw)
 		except SOAPError as e:
 			raise jiraError.OperationFailed(e)
+
+class Comment(JiraObject):
+	sudsType = "tns1:RemoteComment"
+	def __init__(self, j):
+		JiraObject.__init__(self, j, None)
+
