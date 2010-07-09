@@ -13,7 +13,7 @@ class JiraObject:
 	NotificationScheme etc.
 	"""
 
-	_specialFields = ['id']
+	_specialFields = ['id', 'raw']
 
 	def __init__(self, s, l):
 		self._soap = s
