@@ -47,7 +47,8 @@ class JiraObject:
 		Classes that inherit JiraObject are supposed to overload this
 		function, to handle _specialFields.
 		"""
-		fields = filter(lambda x: x not in self._specialFields, self.fields())
+		fields = map(lambda x: x.decode("UTF-8"), filter(lambda x: x not in self._specialFields, self.fields()))
+		#fields = filter(lambda x: x not in self._specialFields, self.fields())
 		return '\n'.join(map(lambda f: " %s%s : %s" % (' '*(self.maxlen()-len(f)), f, self.__dict__[f]), fields))
 
 	def __str__(self):
