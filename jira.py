@@ -21,6 +21,12 @@ class JiraObject:
 		# Yep, I know, it's not optimal, but it's convenient
 		map(lambda x: self.__dict__.update([(x, l[x])]), l.__dict__)
 	
+
+		self.verify()
+
+	def verify(self):
+		print >>sys.stderr, "FIXME: Verify not implemented for this JIRA Object type"
+		return (True, True)
 	def fields(self):
 		"""
 		Returns list of all JIRA fields
