@@ -7,6 +7,8 @@ from suds import WebFault as SOAPError
 import sys
 import soap
 import types
+import datetime
+
 import jiraError
 
 class JiraObject:
@@ -189,4 +191,8 @@ class Comment(JiraObject):
 	sudsType = "tns1:RemoteComment"
 	def __init__(self, j):
 		JiraObject.__init__(self, j, None)
+		self.raw.author = j.access["username"]
+		self.raw.updateAuthor = j.access["username"]
+		self.raw.created = datetime.datetime.now()
+		self.raw.updated = datetime.datetime.now()
 
