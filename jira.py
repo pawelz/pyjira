@@ -29,27 +29,19 @@ class JiraObject:
 		else:
 			self.raw = l
 
-		print self.raw
-		# Yep, I know, it's not optimal, but it's convenient
-		map(lambda x: self.__dict__.update([(x, self.raw[x])]), self.raw.__dict__)
-
-		self.verify()
-
-	def verify(self):
-		print >>sys.stderr, "FIXME: Verify not implemented for this JIRA Object type"
-		return (True, True)
+		### Useful for debug purposes
+		### print self.raw
 
 	def fields(self):
 		"""
 		Returns list of all JIRA fields
-
-		Actually it returns all class fields that are not methodes and whose
-		names does not begin with '_'.
 		"""
-		return filter(lambda x: type(self.__dict__[x]) != type(self.fields) and x[0] != '_', self.__dict__)
+		# filter out all _special fields
+		return filter(lambda x: str(x)[0] != '_', list(self.raw.__dict__))
 
 	def maxlen(self):
 		"""Compute maximal field name, and cache result in self._max variable"""
+		# This is a bit tricky. It sets _max iff it is not set yet.
 		return self.__dict__.setdefault('_max', reduce(max, map(len, self.fields())))
 
 	def display(self):
@@ -59,9 +51,8 @@ class JiraObject:
 		Classes that inherit JiraObject are supposed to overload this
 		function, to handle _specialFields.
 		"""
-		fields = map(lambda x: x.decode("UTF-8"), filter(lambda x: x not in self._specialFields, self.fields()))
-		#fields = filter(lambda x: x not in self._specialFields, self.fields())
-		return '\n'.join(map(lambda f: " %s%s : %s" % (' '*(self.maxlen()-len(f)), f, self.__dict__[f]), fields))
+		fields = [str(x).decode("UTF-8") for x in self.fields() if x not in self._specialFields ]
+		return '\n'.join(map(lambda f: " %s%s : %s" % (' '*(self.maxlen()-len(f)), f, self.raw.__dict__[f]), fields))
 
 	def __str__(self):
 		"""
@@ -72,9 +63,9 @@ class JiraObject:
 		user is users name, or it is User object.
 		"""
 		try:
-			return self.key
+			return self.raw.key
 		except AttributeError:
-			return self.name
+			return self.raw.name
 		except AttributeError as e:
 			raise jiraError.CantCastToString(e)
 
@@ -131,19 +122,19 @@ class Jira:
 
 class Project(JiraObject):
 	def getIssues(self, status="Open"):
-		return self._soap.service.getIssuesFromJqlSearch(self._soap.token, "project = %s and status = %s" % (self.key, status), 300)
+		return self._soap.service.getIssuesFromJqlSearch(self._soap.token, "project = %s and status = %s" % (self.raw.key, status), 300)
 
 	def getLead(self):
-		return self._soap.service.getUser(self._soap.token, self.lead)
+		return self._soap.service.getUser(self._soap.token, self.raw.lead)
 
 	def getNotificationScheme(self):
-		return NotificationScheme(self.notificationScheme)
+		return NotificationScheme(self.raw.notificationScheme)
 
 	def getIssueSecurityScheme(self):
-		return IssueSecurityScheme(self.issueSecurityScheme)
+		return IssueSecurityScheme(self.raw.issueSecurityScheme)
 
 	def getPermissionScheme(self):
-		return PermissionScheme(self.permissionScheme)
+		return PermissionScheme(self.raw.permissionScheme)
 
 class Issue(JiraObject):
 	_specialFields = ['id', 'raw', 'key', 'summary', 'description', 'reporter', 'assignee']
@@ -151,16 +142,16 @@ class Issue(JiraObject):
 
 	def __init__(self, j, r):
 		JiraObject.__init__(self, j, r)
-		self._comments=self._soap.service.getComments(self._soap.token, self.key)
+		self._comments=self._soap.service.getComments(self._soap.token, self.raw.key)
 
 	def display(self):
 		return '[%s] (%s => %s) %s\n%s\n\n%s\n%s\n' % (
-				self.key,
-				self.reporter,
-				self.summary,
-				self.assignee,
+				self.raw.key,
+				self.raw.reporter,
+				self.raw.summary,
+				self.raw.assignee,
 				JiraObject.display(self),
-				self.description,
+				self.raw.description,
 				'\n\n'.join([str(i).decode("UTF-8") for i in self._comments]))
 	
 class NotificationScheme(JiraObject):
@@ -183,7 +174,7 @@ class Group(JiraObject):
 	sudsType = "TODO:unknown"
 	def getMembers(self):
 		# Yeaahhh, functional overdoze
-		return map(lambda x: User(self._soap, x), filter(lambda x: x, self.users))
+		return map(lambda x: User(self._soap, x), filter(lambda x: x, self.raw.users))
 
 	def removeUser(self, u):
 		try:
