@@ -51,8 +51,11 @@ class JiraObject:
 		Classes that inherit JiraObject are supposed to overload this
 		function, to handle _specialFields.
 		"""
-		fields = [str(x).decode("UTF-8") for x in self.fields() if x not in self._specialFields ]
-		return '\n'.join(map(lambda f: " %s%s : %s" % (' '*(self.maxlen()-len(f)), f, self.raw.__dict__[f]), fields))
+		# generate iterator that iterates through all non special fields
+		fields = (str(x).decode("UTF-8") for x in self.fields() if x not in self._specialFields)
+
+		# return table containing all these fields
+		return '\n'.join([" %s%s : %s" % (' '*(self.maxlen()-len(f)), f, self.raw.__dict__[f]) for f in fields])
 
 	def __str__(self):
 		"""
@@ -174,7 +177,7 @@ class Group(JiraObject):
 	sudsType = "TODO:unknown"
 	def getMembers(self):
 		# Yeaahhh, functional overdoze
-		return map(lambda x: User(self._soap, x), filter(lambda x: x, self.raw.users))
+		return [User(self._soap, x) for x in self.raw.users if x]
 
 	def removeUser(self, u):
 		try:
