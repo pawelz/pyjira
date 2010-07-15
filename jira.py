@@ -37,7 +37,7 @@ class JiraObject:
 	def fields(self):
 		"""Returns list of all JIRA fields"""
 		# filter out all _special fields
-		return filter(lambda x: str(x)[0] != '_', list(self.raw.__dict__))
+		return filter(lambda x: str(x)[0] != '_', self.raw.__dict__)
 
 	def maxlen(self):
 		"""Compute maximal field name, and cache result in self._max variable"""
