@@ -68,9 +68,10 @@ class JiraObject:
 		try:
 			return self.raw.key
 		except AttributeError:
-			return self.raw.name
-		except AttributeError as e:
-			raise jiraError.CantCastToString(e)
+			try:
+				return self.raw.name
+			except AttributeError as e:
+				raise jiraError.CantCastToString(e)
 
 class Jira:
 	"""
