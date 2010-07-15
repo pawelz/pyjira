@@ -35,9 +35,7 @@ class JiraObject:
 		### print self.raw
 
 	def fields(self):
-		"""
-		Returns list of all JIRA fields
-		"""
+		"""Returns list of all JIRA fields"""
 		# filter out all _special fields
 		return filter(lambda x: str(x)[0] != '_', list(self.raw.__dict__))
 
