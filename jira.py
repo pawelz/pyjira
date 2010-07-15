@@ -158,6 +158,20 @@ class Issue(JiraObject):
 				self.raw.description,
 				'\n\n'.join([str(i).decode("UTF-8") for i in self._comments]))
 	
+	def comment(self, c):
+		"""
+		Adds comment to the issue.
+		Accepts Comment object, or just string as an argument.
+		"""
+		if (type(c) == types.StringType):
+			cmnt = Comment(self._soap)
+			cmnt.raw.body = c
+		else:
+			cmnt = c
+
+		self._soap.service.addComment(self._soap.token, self.raw.key, cmnt.raw)
+		self._comments=self._soap.service.getComments(self._soap.token, self.raw.key)
+	
 class NotificationScheme(JiraObject):
 	sudsType = "TODO:unknown"
 	pass
