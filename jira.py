@@ -22,7 +22,7 @@ class JiraObject:
 	sudsType = ""
 
 	def __init__(self, s, l):
-		self._soap = s
+		self.jira = s
 
 		# [pl] Jeżeli l jest Null, tworzymy pusty obiekt danego typu
 		if (type(l) == types.NoneType):
@@ -128,7 +128,7 @@ class Project(JiraObject):
 
 	def __init__(self, j, r):
 		JiraObject.__init__(self, j, r)
-		self.issueTypes = self._soap.service.getIssueTypesForProject(self._soap.token, self.raw.id)
+		self.issueTypes = self.jira.service.getIssueTypesForProject(self.jira.token, self.raw.id)
 
 	def issueTypeIdByName(self, n):
 		"""
@@ -155,10 +155,10 @@ class Project(JiraObject):
 			raise InvalidIssueType(i)
 
 	def getIssues(self, status="Open"):
-		return self._soap.service.getIssuesFromJqlSearch(self._soap.token, "project = %s and status = %s" % (self.raw.key, status), 300)
+		return self.jira.service.getIssuesFromJqlSearch(self.jira.token, "project = %s and status = %s" % (self.raw.key, status), 300)
 
 	def getLead(self):
-		return self._soap.service.getUser(self._soap.token, self.raw.lead)
+		return self.jira.service.getUser(self.jira.token, self.raw.lead)
 
 	def getNotificationScheme(self):
 		return NotificationScheme(self.raw.notificationScheme)
@@ -177,7 +177,7 @@ class Issue(JiraObject):
 	def __init__(self, j, r=None):
 		JiraObject.__init__(self, j, r)
 		if r:
-			self._comments=self._soap.service.getComments(self._soap.token, self.raw.key)
+			self._comments=self.jira.service.getComments(self.jira.token, self.raw.key)
 
 	def display(self):
 		return '[%s] (%s => %s) %s\n%s\n\n%s\n%s\n' % (
@@ -195,13 +195,13 @@ class Issue(JiraObject):
 		Accepts Comment object, or just string as an argument.
 		"""
 		if (type(c) == types.StringType):
-			cmnt = Comment(self._soap)
+			cmnt = Comment(self.jira)
 			cmnt.raw.body = c
 		else:
 			cmnt = c
 
-		self._soap.service.addComment(self._soap.token, self.raw.key, cmnt.raw)
-		self._comments=self._soap.service.getComments(self._soap.token, self.raw.key)
+		self.jira.service.addComment(self.jira.token, self.raw.key, cmnt.raw)
+		self._comments=self.jira.service.getComments(self.jira.token, self.raw.key)
 	
 class NotificationScheme(JiraObject):
 	sudsType = "TODO:unknown"
@@ -227,11 +227,11 @@ class Group(JiraObject):
 	sudsType = "TODO:unknown"
 	def getMembers(self):
 		# Yeaahhh, functional overdoze
-		return [User(self._soap, x) for x in self.raw.users if x]
+		return [User(self.jira, x) for x in self.raw.users if x]
 
 	def removeUser(self, u):
 		try:
-			self._soap.service.removeUserFromGroup(self._soap.token, self.raw, u.raw)
+			self.jira.service.removeUserFromGroup(self.jira.token, self.raw, u.raw)
 		except SOAPError as e:
 			raise jiraError.OperationFailed(e)
 
