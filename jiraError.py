@@ -43,3 +43,9 @@ class IssueNotFound(JiraError):
 
 class OperationFailed(JiraError):
 	importance = 1
+
+class InvalidIssueType(JiraError):
+	importance = 1
+
+	def __str__(self):
+		return "Invalid issueType: %s" % JiraError.__str__(self)

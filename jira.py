@@ -125,6 +125,36 @@ class Jira:
 			raise jiraError.IssueNotFound(e)
 
 class Project(JiraObject):
+	issueTypes = []
+
+	def __init__(self, j, r):
+		JiraObject.__init__(self, j, r)
+		self.issueTypes = self._soap.service.getIssueTypesForProject(self._soap.token, self.raw.id)
+
+	def issueTypeIdByName(self, n):
+		"""
+		Returns id of issueType with given name.
+
+		If issueType is not valid for given project, raises InvalidIssueType
+		exception.
+		"""
+		try:
+			return [x.id for x in issueTypes if x.name == n][0]
+		except IndexError:
+			raise InvalidIssueType(n)
+
+	def issueTypeNameById(self, i):
+		"""
+		Returns name of issueType with given id.
+
+		If issueType is not valid for given project, raises InvalidIssueType
+		exception.
+		"""
+		try:
+			return [x.name for x in issueTypes if x.id == i][0]
+		except IndexError:
+			raise InvalidIssueType(i)
+
 	def getIssues(self, status="Open"):
 		return self._soap.service.getIssuesFromJqlSearch(self._soap.token, "project = %s and status = %s" % (self.raw.key, status), 300)
 
@@ -141,12 +171,14 @@ class Project(JiraObject):
 		return PermissionScheme(self.raw.permissionScheme)
 
 class Issue(JiraObject):
-	_specialFields = ['id', 'raw', 'key', 'summary', 'description', 'reporter', 'assignee']
-	sudsType = "TODO:unknown"
+	_specialFields = ['id', 'raw', 'key', 'type', 'summary', 'description', 'reporter', 'assignee']
+	_comments = []
+	sudsType = "tns1:RemoteIssue"
 
-	def __init__(self, j, r):
+	def __init__(self, j, r=None):
 		JiraObject.__init__(self, j, r)
-		self._comments=self._soap.service.getComments(self._soap.token, self.raw.key)
+		if r:
+			self._comments=self._soap.service.getComments(self._soap.token, self.raw.key)
 
 	def display(self):
 		return '[%s] (%s => %s) %s\n%s\n\n%s\n%s\n' % (
@@ -177,6 +209,10 @@ class NotificationScheme(JiraObject):
 	pass
 
 class IssueSecurityScheme(JiraObject):
+	sudsType = "TODO:unknown"
+	pass
+
+class IssueType(JiraObject):
 	sudsType = "TODO:unknown"
 	pass
 
