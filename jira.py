@@ -78,30 +78,29 @@ class Jira:
 	Class representing Jira instance. Note that this class does not inherits
 	JiraObject class.
 	"""
-	project = {}
+	project = []
 	def __init__(self, j):
 		self._soap = j
-		for p in self._soap.service.getProjectsNoSchemes(self._soap.token):
-			self.project[p["key"]] = Project(self._soap, p)
+		project = [x.name for x in self._soap.service.getProjectsNoSchemes(self._soap.token)]
 
 	def getProject(self, k):
 		"""Returns project with given KEY."""
-		return self.project[k]
+		return Project(self._soap, self._soap.service.getProjectByKey(self._soap.token, k))
 
-	def getProjectById(self, i):
-		"""Returns project with given Id."""
-		return self.project[k]
-		for p in self.project:
-			if self.project[p].id == i:
-				return self.project[p]
-		raise jiraError.ProjectNotFound(p)
+	# def getProjectById(self, i):
+	# 	"""Returns project with given Id."""
+	# 	return self.project[k]
+	# 	for p in self.project:
+	# 		if self.project[p].id == i:
+	# 			return self.project[p]
+	# 	raise jiraError.ProjectNotFound(p)
 
-	def getProjectByName(self, n):
-		"""Returns project with given name."""
-		for p in self.project:
-			if self.project[p].name == n:
-				return self.project[p]
-		raise jiraError.ProjectNotFound()
+	# def getProjectByName(self, n):
+	# 	"""Returns project with given name."""
+	# 	for p in self.project:
+	# 		if self.project[p].name == n:
+	# 			return self.project[p]
+	# 	raise jiraError.ProjectNotFound()
 
 	def getGroupByName(self, n):
 		"""Returns group with given name."""
