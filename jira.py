@@ -86,11 +86,11 @@ class Jira:
 
 	def getProject(self, k):
 		"""Returns project with given KEY."""
-		return project["k"]
+		return self.project[k]
 
 	def getProjectById(self, i):
 		"""Returns project with given Id."""
-		return project["k"]
+		return self.project[k]
 		for p in self.project:
 			if self.project[p].id == i:
 				return self.project[p]
