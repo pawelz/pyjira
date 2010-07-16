@@ -73,19 +73,19 @@ class JiraObject:
 			except AttributeError as e:
 				raise jiraError.CantCastToString(e)
 
-class Jira:
+class Jira(soap.Soap):
 	"""
 	Class representing Jira instance. Note that this class does not inherits
 	JiraObject class.
 	"""
 	project = []
-	def __init__(self, j):
-		self._soap = j
-		project = [x.name for x in self._soap.service.getProjectsNoSchemes(self._soap.token)]
+	def __init__(self, url, username, password):
+		soap.Soap.__init__(self, url, username, password)
+		project = [x.name for x in self.service.getProjectsNoSchemes(self.token)]
 
 	def getProject(self, k):
 		"""Returns project with given KEY."""
-		return Project(self._soap, self._soap.service.getProjectByKey(self._soap.token, k))
+		return Project(self, self.service.getProjectByKey(self.token, k))
 
 	# def getProjectById(self, i):
 	# 	"""Returns project with given Id."""
@@ -105,21 +105,21 @@ class Jira:
 	def getGroupByName(self, n):
 		"""Returns group with given name."""
 		try:
-			return Group(self._soap, self._soap.service.getGroup(self._soap.token, n))
+			return Group(self, self.service.getGroup(self.token, n))
 		except SOAPError as e:
 			raise jiraError.GroupNotFound(e)
 	
 	def getUserByName(self, n):
 		"""Returns user with given name."""
 		try:
-			return User(self._soap, self._soap.service.getUser(self._soap.token, n))
+			return User(self, self.service.getUser(self.token, n))
 		except SOAPError as e:
 			raise jiraError.UserNotFound(e)
 	
 	def getIssueByKey(self, k):
 		"""Returns issue with given key."""
 		try:
-			return Issue(self._soap, self._soap.service.getIssue(self._soap.token, k))
+			return Issue(self, self.service.getIssue(self.token, k))
 		except SOAPError as e:
 			raise jiraError.IssueNotFound(e)
 
