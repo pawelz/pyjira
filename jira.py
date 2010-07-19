@@ -96,8 +96,17 @@ class Jira(soap.Soap):
 		project = [x.name for x in self.service.getProjectsNoSchemes(self.token)]
 
 	def getProject(self, k):
-		"""Returns project with given KEY."""
-		return Project(self, self.service.getProjectByKey(self.token, k))
+		"""
+		If k is string, interpret it as project KEY. Otherwise just return k.
+		This way we can type getProject(p) and we don't have to care wether k
+		is Project or KEY.
+
+		TODO: cache projects fetched from JIRA.
+		"""
+		print type(k), str(k)
+		if type(k) == types.StringType or type(k) == types.UnicodeType:
+			return Project(self, self.service.getProjectByKey(self.token, k))
+		return k
 
 	# def getProjectById(self, i):
 	# 	"""Returns project with given Id."""
@@ -191,10 +200,21 @@ class Issue(JiraObject):
 		JiraObject.__init__(self, j, r)
 		if r:
 			self._comments=self.jira.service.getComments(self.jira.token, self.raw.key)
-			if not p:
+
+		# [pl] Logika:
+		#      Jeżeli dostaliśmy p (jako Project lub String) ustawiamy project
+		#      na to co dostaliśmy.
+		#      Jeżeli nie dostaliśmy p ale mamy key, ustawiamy project na
+		#      podstawie key.
+		#      Ostatecznie fallback na None
+
+		if p:
+			self.project=self.jira.getProject(p)
+		else:
+			try:
 				self.project=self.jira.getProject(self.raw.key[0:self.raw.key.find('-')])
-			else:
-				self.project=p
+			except TypeError: # TypeError: 'NoneType' object is unsubscriptable
+				pass
 
 	def default(self):
 		self.raw.reporter=self.jira.access["username"]
