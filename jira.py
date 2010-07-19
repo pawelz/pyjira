@@ -158,6 +158,8 @@ class Project(JiraObject):
 		If issueType is not valid for given project, raises jiraError.InvalidIssueType
 		exception.
 		"""
+		if not n:
+			return None
 		try:
 			return [x.id for x in self.issueTypes if x.name == n][0]
 		except IndexError:
@@ -170,6 +172,8 @@ class Project(JiraObject):
 		If issueType is not valid for given project, raises jiraError.InvalidIssueType
 		exception.
 		"""
+		if not i:
+			return None
 		try:
 			return [x.name for x in self.issueTypes if x.id == i][0]
 		except IndexError:
