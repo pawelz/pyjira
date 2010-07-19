@@ -138,7 +138,7 @@ class Project(JiraObject):
 		exception.
 		"""
 		try:
-			return [x.id for x in issueTypes if x.name == n][0]
+			return [x.id for x in self.issueTypes if x.name == n][0]
 		except IndexError:
 			raise InvalidIssueType(n)
 
@@ -150,12 +150,12 @@ class Project(JiraObject):
 		exception.
 		"""
 		try:
-			return [x.name for x in issueTypes if x.id == i][0]
+			return [x.name for x in self.issueTypes if x.id == i][0]
 		except IndexError:
 			raise InvalidIssueType(i)
 
 	def getIssues(self, status="Open"):
-		return self.jira.service.getIssuesFromJqlSearch(self.jira.token, "project = %s and status = %s" % (self.raw.key, status), 300)
+		return [Issue(self.jira, x, self) for x in self.jira.service.getIssuesFromJqlSearch(self.jira.token, "project = %s and status = %s" % (self.raw.key, status), 300)]
 
 	def getLead(self):
 		return self.jira.service.getUser(self.jira.token, self.raw.lead)
@@ -172,19 +172,25 @@ class Project(JiraObject):
 class Issue(JiraObject):
 	_specialFields = ['id', 'raw', 'key', 'type', 'summary', 'description', 'reporter', 'assignee']
 	_comments = []
+	project=None
 	sudsType = "tns1:RemoteIssue"
 
-	def __init__(self, j, r=None):
+	def __init__(self, j, r=None, p=None):
 		JiraObject.__init__(self, j, r)
 		if r:
 			self._comments=self.jira.service.getComments(self.jira.token, self.raw.key)
+			if not p:
+				self.project=self.jira.getProject(self.raw.key[0:self.raw.key.find('-')])
+			else:
+				self.project=p
 
 	def display(self):
-		return '[%s] (%s => %s) %s\n%s\n\n%s\n%s\n' % (
+		return '[%s] (%s => %s) %s: %s\n%s\n\n%s\n%s\n' % (
 				self.raw.key,
 				self.raw.reporter,
-				self.raw.summary,
 				self.raw.assignee,
+				self.project and self.project.issueTypeNameById(self.raw.type) or "None",
+				self.raw.summary,
 				JiraObject.display(self),
 				self.raw.description,
 				'\n\n'.join([str(i).decode("UTF-8") for i in self._comments]))
