@@ -27,6 +27,7 @@ class JiraObject:
 		# [pl] Jeżeli l jest Null, tworzymy pusty obiekt danego typu
 		if (type(l) == types.NoneType):
 			self.raw = s.factory.create(self.sudsType)
+			self.default()
 		# [pl] w przeciwnym przypadku l jest obiektem suds.
 		else:
 			self.raw = l
@@ -56,6 +57,17 @@ class JiraObject:
 
 		# return table containing all these fields
 		return '\n'.join([" %s%s : %s" % (' '*(self.maxlen()-len(f)), f, self.raw.__dict__[f]) for f in fields])
+
+	def default(self):
+		"""
+		This method is being executed when *NEW* object is created. By default
+		it does nothing. Overload it to initialize some default values of jira
+		fields, like:
+
+		self.raw.author=self.jira.access["username"]
+		self.raw.created = datetime.datetime.now()
+		"""
+		pass
 
 	def __str__(self):
 		"""
@@ -184,6 +196,11 @@ class Issue(JiraObject):
 			else:
 				self.project=p
 
+	def default(self):
+		self.raw.reporter=self.jira.access["username"]
+		self.raw.created = datetime.datetime.now()
+		self.raw.updated = datetime.datetime.now()
+
 	def display(self):
 		return '[%s] (%s => %s) %s: %s\n%s\n\n%s\n%s\n' % (
 				self.raw.key,
@@ -245,8 +262,9 @@ class Comment(JiraObject):
 	sudsType = "tns1:RemoteComment"
 	def __init__(self, j):
 		JiraObject.__init__(self, j, None)
-		self.raw.author = j.access["username"]
-		self.raw.updateAuthor = j.access["username"]
+
+	def default(self):
+		self.raw.author = self.jira.access["username"]
+		self.raw.updateAuthor = self.jira.access["username"]
 		self.raw.created = datetime.datetime.now()
 		self.raw.updated = datetime.datetime.now()
-
