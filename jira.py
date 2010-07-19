@@ -155,25 +155,25 @@ class Project(JiraObject):
 		"""
 		Returns id of issueType with given name.
 
-		If issueType is not valid for given project, raises InvalidIssueType
+		If issueType is not valid for given project, raises jiraError.InvalidIssueType
 		exception.
 		"""
 		try:
 			return [x.id for x in self.issueTypes if x.name == n][0]
 		except IndexError:
-			raise InvalidIssueType(n)
+			raise jiraError.InvalidIssueType(n)
 
 	def issueTypeNameById(self, i):
 		"""
 		Returns name of issueType with given id.
 
-		If issueType is not valid for given project, raises InvalidIssueType
+		If issueType is not valid for given project, raises jiraError.InvalidIssueType
 		exception.
 		"""
 		try:
 			return [x.name for x in self.issueTypes if x.id == i][0]
 		except IndexError:
-			raise InvalidIssueType(i)
+			raise jiraError.InvalidIssueType(i)
 
 	def getIssues(self, status="Open"):
 		return [Issue(self.jira, x, self) for x in self.jira.service.getIssuesFromJqlSearch(self.jira.token, "project = %s and status = %s" % (self.raw.key, status), 300)]
