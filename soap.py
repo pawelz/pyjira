@@ -16,6 +16,13 @@ class Soap(suds.client.Client):
 		self.access = {"URL": URL, "username": username, "password": password}
 		self.auth()
 
+	def soap(self, func, *args):
+		try:
+			return func(self.token, *args)
+		except (SOAPError):
+			self.auth()
+			return func(self.token, *args)
+
 	# Private methods
 
 	def auth(self):

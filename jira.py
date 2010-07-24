@@ -93,7 +93,7 @@ class Jira(soap.Soap):
 	project = []
 	def __init__(self, url, username, password):
 		soap.Soap.__init__(self, url, username, password)
-		project = [x.name for x in self.service.getProjectsNoSchemes(self.token)]
+		project = [x.name for x in self.soap(self.service.getProjectsNoSchemes)]
 
 	def getProject(self, k):
 		"""
@@ -105,7 +105,7 @@ class Jira(soap.Soap):
 		"""
 		print type(k), str(k)
 		if type(k) == types.StringType or type(k) == types.UnicodeType:
-			return Project(self, self.service.getProjectByKey(self.token, k))
+			return Project(self, self.soap(self.service.getProjectByKey, k))
 		return k
 
 	# def getProjectById(self, i):
@@ -126,21 +126,21 @@ class Jira(soap.Soap):
 	def getGroupByName(self, n):
 		"""Returns group with given name."""
 		try:
-			return Group(self, self.service.getGroup(self.token, n))
+			return Group(self, self.soap(self.service.getGroup, n))
 		except SOAPError as e:
 			raise jiraError.GroupNotFound(e)
 	
 	def getUserByName(self, n):
 		"""Returns user with given name."""
 		try:
-			return User(self, self.service.getUser(self.token, n))
+			return User(self, self.soap(getUser, n))
 		except SOAPError as e:
 			raise jiraError.UserNotFound(e)
 	
 	def getIssueByKey(self, k):
 		"""Returns issue with given key."""
 		try:
-			return Issue(self, self.service.getIssue(self.token, k))
+			return Issue(self, self.soap(self.service.getIssue, k))
 		except SOAPError as e:
 			raise jiraError.IssueNotFound(e)
 
@@ -149,7 +149,7 @@ class Project(JiraObject):
 
 	def __init__(self, j, r):
 		JiraObject.__init__(self, j, r)
-		self.issueTypes = self.jira.service.getIssueTypesForProject(self.jira.token, self.raw.id)
+		self.issueTypes = self.jira.soap(self.jira.service.getIssueTypesForProject, self.raw.id)
 
 	def issueTypeIdByName(self, n):
 		"""
@@ -180,10 +180,10 @@ class Project(JiraObject):
 			raise jiraError.InvalidIssueType(i)
 
 	def getIssues(self, status="Open"):
-		return [Issue(self.jira, x, self) for x in self.jira.service.getIssuesFromJqlSearch(self.jira.token, "project = %s and status = %s" % (self.raw.key, status), 300)]
+		return [Issue(self.jira, x, self) for x in self.jira.soap(self.jira.service.getIssuesFromJqlSearch, "project = %s and status = %s" % (self.raw.key, status), 300)]
 
 	def getLead(self):
-		return self.jira.service.getUser(self.jira.token, self.raw.lead)
+		return self.jira.soap(self.jira.service.getUser, self.raw.lead)
 
 	def getNotificationScheme(self):
 		return NotificationScheme(self.raw.notificationScheme)
@@ -203,7 +203,7 @@ class Issue(JiraObject):
 	def __init__(self, j, r=None, p=None):
 		JiraObject.__init__(self, j, r)
 		if r:
-			self._comments=self.jira.service.getComments(self.jira.token, self.raw.key)
+			self._comments=self.jira.soap(self.jira.service.getComments, self.raw.key)
 
 		# [pl] Logika:
 		#      Jeżeli dostaliśmy p (jako Project lub String) ustawiamy project
@@ -247,8 +247,8 @@ class Issue(JiraObject):
 		else:
 			cmnt = c
 
-		self.jira.service.addComment(self.jira.token, self.raw.key, cmnt.raw)
-		self._comments=self.jira.service.getComments(self.jira.token, self.raw.key)
+		slef.jira.soap(self.jira.service.addComment, self.raw.key, cmnt.raw)
+		self._comments=self.jira.soap(self.jira.service.getComments, self.raw.key)
 	
 class NotificationScheme(JiraObject):
 	sudsType = "TODO:unknown"
@@ -278,7 +278,7 @@ class Group(JiraObject):
 
 	def removeUser(self, u):
 		try:
-			self.jira.service.removeUserFromGroup(self.jira.token, self.raw, u.raw)
+			self.jira.soap(self.jira.service.removeUserFromGroup, self.raw, u.raw)
 		except SOAPError as e:
 			raise jiraError.OperationFailed(e)
 
