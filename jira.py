@@ -91,9 +91,40 @@ class Jira(soap.Soap):
 	JiraObject class.
 	"""
 	project = []
+	issueStatuses = []
+
 	def __init__(self, url, username, password):
 		soap.Soap.__init__(self, url, username, password)
 		project = [x.name for x in self.soap(self.service.getProjectsNoSchemes)]
+		self.issueStatuses = self.soap(self.service.getStatuses)
+
+	def issueStatusIdByName(self, n):
+		"""
+		Returns id of issueStatus with given name.
+
+		If issueStatus is not valid for given project, raises
+		jiraError.InvalidIssueStatus exception.
+		"""
+		if not n:
+			return None
+		try:
+			return [x.id for x in self.issueStatuses if x.name == n][0]
+		except IndexError:
+			raise jiraError.InvalidIssueStatus(n)
+
+	def issueStatusNameById(self, i):
+		"""
+		Returns name of issueStatus with given id.
+
+		If issueStatus is not valid for given project, raises
+		jiraError.InvalidIssueStatus exception.
+		"""
+		if not i:
+			return None
+		try:
+			return [x.name for x in self.issueStatuses if x.id == i][0]
+		except IndexError:
+			raise jiraError.InvalidIssueStatus(i)
 
 	def getProject(self, k):
 		"""
@@ -259,6 +290,10 @@ class IssueSecurityScheme(JiraObject):
 	pass
 
 class IssueType(JiraObject):
+	sudsType = "TODO:unknown"
+	pass
+
+class IssueStatus(JiraObject):
 	sudsType = "TODO:unknown"
 	pass
 
