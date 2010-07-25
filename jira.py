@@ -281,6 +281,9 @@ class Issue(JiraObject):
 		slef.jira.soap(self.jira.service.addComment, self.raw.key, cmnt.raw)
 		self._comments=self.jira.soap(self.jira.service.getComments, self.raw.key)
 	
+	def statusName(self):
+		return self.jira.issueStatusNameById(self.raw.status)
+
 class NotificationScheme(JiraObject):
 	sudsType = "TODO:unknown"
 	pass
