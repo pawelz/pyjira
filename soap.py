@@ -19,7 +19,7 @@ class Soap(suds.client.Client):
 	def soap(self, func, *args):
 		try:
 			return func(self.token, *args)
-		except (SOAPError):
+		except (suds.WebFault):
 			self.auth()
 			return func(self.token, *args)
 
