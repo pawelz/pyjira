@@ -148,7 +148,7 @@ class Jira(soap.Soap):
 	def getUserByName(self, n):
 		"""Returns user with given name."""
 		try:
-			return User(self, self.soap(getUser, n))
+			return User(self, self.soap(self.service.getUser, n))
 		except SOAPError as e:
 			raise jiraError.UserNotFound(e)
 	
