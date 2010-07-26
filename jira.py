@@ -138,21 +138,6 @@ class Jira(soap.Soap):
 			return Project(self, self.soap(self.service.getProjectByKey, k))
 		return k
 
-	# def getProjectById(self, i):
-	# 	"""Returns project with given Id."""
-	# 	return self.project[k]
-	# 	for p in self.project:
-	# 		if self.project[p].id == i:
-	# 			return self.project[p]
-	# 	raise jiraError.ProjectNotFound(p)
-
-	# def getProjectByName(self, n):
-	# 	"""Returns project with given name."""
-	# 	for p in self.project:
-	# 		if self.project[p].name == n:
-	# 			return self.project[p]
-	# 	raise jiraError.ProjectNotFound()
-
 	def getGroupByName(self, n):
 		"""Returns group with given name."""
 		try:
