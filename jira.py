@@ -220,13 +220,8 @@ class Issue(JiraObject):
 		if r:
 			self._comments=self.jira.soap(self.jira.service.getComments, self.raw.key)
 
-		# [pl] Logika:
-		#      Jeżeli dostaliśmy p (jako Project lub String) ustawiamy project
-		#      na to co dostaliśmy.
-		#      Jeżeli nie dostaliśmy p ale mamy key, ustawiamy project na
-		#      podstawie key.
-		#      Ostatecznie fallback na None
-
+		# Try to set project to p. On error read project from IssueKey.
+		# Finally leave project=None.
 		if p:
 			self.project=self.jira.getProject(p)
 		else:
