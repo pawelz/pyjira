@@ -9,6 +9,10 @@ import soap
 import types
 import datetime
 
+# FORCE UTF-8
+reload(sys)
+sys.setdefaultencoding("UTF-8")
+
 import jiraError
 
 class JiraObject:
