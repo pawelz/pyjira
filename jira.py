@@ -129,7 +129,7 @@ class Jira(soap.Soap):
 	def getProject(self, k):
 		"""
 		If k is string, interpret it as project KEY. Otherwise just return k.
-		This way we can type getProject(p) and we don't have to care wether k
+		This way we can type getProject(p) and we don't have to care whether k
 		is Project or KEY.
 
 		TODO: cache projects fetched from JIRA.
