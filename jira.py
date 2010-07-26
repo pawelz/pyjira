@@ -134,7 +134,6 @@ class Jira(soap.Soap):
 
 		TODO: cache projects fetched from JIRA.
 		"""
-		print type(k), str(k)
 		if type(k) == types.StringType or type(k) == types.UnicodeType:
 			return Project(self, self.soap(self.service.getProjectByKey, k))
 		return k
