@@ -276,14 +276,6 @@ class IssueSecurityScheme(JiraObject):
 	sudsType = "TODO:unknown"
 	pass
 
-class IssueType(JiraObject):
-	sudsType = "TODO:unknown"
-	pass
-
-class IssueStatus(JiraObject):
-	sudsType = "TODO:unknown"
-	pass
-
 class PermissionScheme(JiraObject):
 	sudsType = "TODO:unknown"
 	pass
