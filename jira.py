@@ -289,6 +289,9 @@ class Group(JiraObject):
 		# Yeaahhh, functional overdoze
 		return [User(self.jira, x) for x in self.raw.users if x]
 
+	def isMember(self, u):
+		return reduce(lambda x, y: x or y, [u.raw.name == z.name for z in self.raw.users if z])
+
 	def removeUser(self, u):
 		try:
 			self.jira.soap(self.jira.service.removeUserFromGroup, self.raw, u.raw)
