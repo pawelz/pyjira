@@ -298,6 +298,12 @@ class Group(JiraObject):
 		except SOAPError as e:
 			raise jiraError.OperationFailed(e)
 
+	def addUser(self, u):
+		try:
+			self.jira.soap(self.jira.service.addUserToGroup, self.raw, u.raw)
+		except SOAPError as e:
+			raise jiraError.OperationFailed(e)
+
 class Comment(JiraObject):
 	sudsType = "tns1:RemoteComment"
 	def __init__(self, j):
