@@ -1,9 +1,10 @@
 0. What is that?
 
-   PyJIRA is ptyhon library for accessing Atlassian JIRA remote API.
+   PyJIRA is a python library for accessing Atlassian JIRA remote API.
    
    It is based on my earlier project - cojira, the commandline interface for
-   JIRA. I'm planning to rewrite cojira to use PyJIRA library in nearest future.
+   JIRA. I'm planning to rewrite cojira to use PyJIRA library in the nearest
+   future.
 
 1. Compatibility
 
