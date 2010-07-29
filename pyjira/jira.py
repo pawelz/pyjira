@@ -290,7 +290,7 @@ class Group(JiraObject):
 
 	def isMember(self, u):
 		print self.raw.users
-		return reduce(lambda x, y: x or y, [u.raw.name == z.name for z in self.raw.users if z])
+		return reduce(lambda x, y: x or y, [u.raw.name == z.name for z in self.raw.users if z], False)
 
 	def removeUser(self, u):
 		try:
