@@ -4,16 +4,22 @@
 # Author:    Paweł Zuzelski <pzz@touk.pl>
 
 import suds
-import jiraError
+import error
+import config
 
 class Soap(suds.client.Client):
 	access = {}
 
 	# Public interface
 
-	def __init__(self, URL, username, password):
+	def __init__(self, URL=None, username=None, password=None):
 		"""Authenticates to JIRA (by calling auth method) and reads list of projects."""
-		self.access = {"URL": URL, "username": username, "password": password}
+		cfg = config.pyjira()
+		self.access = {
+			"URL": URL or cfg["url"],
+			"username": username or cfg["username"],
+			"password": password or cfg["password"]
+		}
 		self.auth()
 
 	def soap(self, func, *args):

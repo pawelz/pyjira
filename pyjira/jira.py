@@ -5,15 +5,14 @@
 
 from suds import WebFault as SOAPError
 import sys
-import soap
 import types
 import datetime
+import soap
+import error
 
 # FORCE UTF-8
 reload(sys)
 sys.setdefaultencoding("UTF-8")
-
-import jiraError
 
 class JiraObject:
 	"""
@@ -87,7 +86,7 @@ class JiraObject:
 			try:
 				return self.raw.name
 			except AttributeError as e:
-				raise jiraError.CantCastToString(e)
+				raise error.CantCastToString(e)
 
 class Jira(soap.Soap):
 	"""
@@ -97,7 +96,7 @@ class Jira(soap.Soap):
 	project = []
 	issueStatuses = []
 
-	def __init__(self, url, username, password):
+	def __init__(self, url=None, username=None, password=None):
 		soap.Soap.__init__(self, url, username, password)
 		project = [x.name for x in self.soap(self.service.getProjectsNoSchemes)]
 		self.issueStatuses = self.soap(self.service.getStatuses)
@@ -107,28 +106,28 @@ class Jira(soap.Soap):
 		Returns id of issueStatus with given name.
 
 		If issueStatus is not valid for given project, raises
-		jiraError.InvalidIssueStatus exception.
+		error.InvalidIssueStatus exception.
 		"""
 		if not n:
 			return None
 		try:
 			return [x.id for x in self.issueStatuses if x.name == n][0]
 		except IndexError:
-			raise jiraError.InvalidIssueStatus(n)
+			raise error.InvalidIssueStatus(n)
 
 	def issueStatusNameById(self, i):
 		"""
 		Returns name of issueStatus with given id.
 
 		If issueStatus is not valid for given project, raises
-		jiraError.InvalidIssueStatus exception.
+		error.InvalidIssueStatus exception.
 		"""
 		if not i:
 			return None
 		try:
 			return [x.name for x in self.issueStatuses if x.id == i][0]
 		except IndexError:
-			raise jiraError.InvalidIssueStatus(i)
+			raise error.InvalidIssueStatus(i)
 
 	def getProject(self, k):
 		"""
@@ -147,21 +146,21 @@ class Jira(soap.Soap):
 		try:
 			return Group(self, self.soap(self.service.getGroup, n))
 		except SOAPError as e:
-			raise jiraError.GroupNotFound(e)
+			raise error.GroupNotFound(e)
 	
 	def getUserByName(self, n):
 		"""Returns user with given name."""
 		try:
 			return User(self, self.soap(self.service.getUser, n))
 		except SOAPError as e:
-			raise jiraError.UserNotFound(e)
+			raise UserNotFound(e)
 	
 	def getIssueByKey(self, k):
 		"""Returns issue with given key."""
 		try:
 			return Issue(self, self.soap(self.service.getIssue, k))
 		except SOAPError as e:
-			raise jiraError.IssueNotFound(e)
+			raise error.IssueNotFound(e)
 
 class Project(JiraObject):
 	issueTypes = []
@@ -174,7 +173,7 @@ class Project(JiraObject):
 		"""
 		Returns id of issueType with given name.
 
-		If issueType is not valid for given project, raises jiraError.InvalidIssueType
+		If issueType is not valid for given project, raises error.InvalidIssueType
 		exception.
 		"""
 		if not n:
@@ -182,13 +181,13 @@ class Project(JiraObject):
 		try:
 			return [x.id for x in self.issueTypes if x.name == n][0]
 		except IndexError:
-			raise jiraError.InvalidIssueType(n)
+			raise error.InvalidIssueType(n)
 
 	def issueTypeNameById(self, i):
 		"""
 		Returns name of issueType with given id.
 
-		If issueType is not valid for given project, raises jiraError.InvalidIssueType
+		If issueType is not valid for given project, raises error.InvalidIssueType
 		exception.
 		"""
 		if not i:
@@ -196,7 +195,7 @@ class Project(JiraObject):
 		try:
 			return [x.name for x in self.issueTypes if x.id == i][0]
 		except IndexError:
-			raise jiraError.InvalidIssueType(i)
+			raise error.InvalidIssueType(i)
 
 	def getIssues(self, status="Open"):
 		return [Issue(self.jira, x, self) for x in self.jira.soap(self.jira.service.getIssuesFromJqlSearch, "project = %s and status = %s" % (self.raw.key, status), 300)]
@@ -290,19 +289,20 @@ class Group(JiraObject):
 		return [User(self.jira, x) for x in self.raw.users if x]
 
 	def isMember(self, u):
+		print self.raw.users
 		return reduce(lambda x, y: x or y, [u.raw.name == z.name for z in self.raw.users if z])
 
 	def removeUser(self, u):
 		try:
 			self.jira.soap(self.jira.service.removeUserFromGroup, self.raw, u.raw)
 		except SOAPError as e:
-			raise jiraError.OperationFailed(e)
+			raise error.OperationFailed(e)
 
 	def addUser(self, u):
 		try:
 			self.jira.soap(self.jira.service.addUserToGroup, self.raw, u.raw)
 		except SOAPError as e:
-			raise jiraError.OperationFailed(e)
+			raise error.OperationFailed(e)
 
 class Comment(JiraObject):
 	sudsType = "tns1:RemoteComment"
