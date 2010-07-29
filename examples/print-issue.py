@@ -1,11 +1,11 @@
 #!/usr/bin/python
 # vim:fileencoding=utf-8
 
-# Copyright: © 2009, 2010 TouK sp. z o.o. s.k.a.
+# Copyright: © 2010 TouK sp. z o.o. s.k.a.
 # Author:    Paweł Zuzelski <pzz@touk.pl>
 
 #
-# This script lists all members of given JIRA group
+# This script prints JIRA issue
 #
 
 import sys
