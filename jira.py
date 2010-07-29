@@ -91,7 +91,7 @@ class JiraObject:
 
 class Jira(soap.Soap):
 	"""
-	Class representing Jira instance. Note that this class does not inherits
+	Class representing Jira instance. Note that this class does not inherit
 	JiraObject class.
 	"""
 	project = []
