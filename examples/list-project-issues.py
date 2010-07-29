@@ -9,15 +9,10 @@
 #
 
 import sys
-import soap
-import jira
-import jiraError
-import config
+from pyjira import jira, error
 
-cfg = config.pyjira()
-j = soap.Soap(cfg["url"], cfg["username"], cfg["password"])
-
-r = jira.Jira(j)
+# Enter you jira URL, login and password here:
+j = jira.Jira("http://example.com/jira", "alice", "secret")
 
 if len(sys.argv) != 2:
 	print "Try: %s project_name" % sys.argv[0]
@@ -25,7 +20,10 @@ if len(sys.argv) != 2:
 
 try:
 	print "Issues in %s:" % sys.argv[1]
-	for i in r.getProjectByName(sys.argv[1]).getIssues("open"):
-		print jira.Issue(j, i).display()
-except(jiraError.ProjectNotFound):
+	project = j.getProject(sys.argv[1])
+	for i in project.getIssues("open"):
+		print "%s: %s" % (i.raw.key, i.raw.summary)
+		# You can also display full information about each issue instead:
+		# print i.display()
+except(error.ProjectNotFound):
 	print "Project not found: ‘%s’." % sys.argv[1]

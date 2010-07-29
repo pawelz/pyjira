@@ -9,15 +9,10 @@
 #
 
 import sys
-import soap
-import jira
-import jiraError
-import config
+from pyjira import jira, error
 
-cfg = config.pyjira()
-j = soap.Soap(cfg["url"], cfg["username"], cfg["password"])
-
-r = jira.Jira(j)
+# Enter you jira URL, login and password here:
+j = jira.Jira("http://example.com/jira", "alice", "secret")
 
 if len(sys.argv) != 2:
 	print "Try: %s group_name" % sys.argv[0]
@@ -25,12 +20,12 @@ if len(sys.argv) != 2:
 
 try:
 	# get Group object
-	g = r.getGroupByName(sys.argv[1])
+	g = j.getGroupByName(sys.argv[1])
 
 	# print its name
-	print "Group: %s" % g.name
+	print "Group: %s" % g.raw.name
 
 	# get list of members, and display it
 	print '\n\n'.join(map(lambda x: x.display(), g.getMembers())).encode('utf-8')
-except(jiraError.GroupNotFound):
+except(error.GroupNotFound):
 	print "Group not found: ‘%s’." % sys.argv[1]
