@@ -163,6 +163,9 @@ class Jira(soap.Soap):
 		except SOAPError as e:
 			raise error.IssueNotFound(e)
 
+	def jqlQuery(self, query):
+		return [Issue(self, x) for x in self.soap(self.service.getIssuesFromJqlSearch, query, 300)]
+
 class Project(JiraObject):
 	issueTypes = []
 
